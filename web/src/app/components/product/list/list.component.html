@@ -1,0 +1,6 @@
+<p *ngIf="termino">Resultados para: <strong> {{ termino }}</strong></p>
+<hr>
+
+<div class="card-columns">
+    <app-product-item  [item]="product" [index]="i"  *ngFor="let product of products; let i = index"></app-product-item>
+</div>

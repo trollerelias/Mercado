@@ -1,0 +1,11 @@
+<div class="card" *ngIf="item">
+    <img *ngIf="item.image" class="card-img-top img-fluid" src="https://{{ item.image }}" [alt]="item.brand">
+    <div class="card-body">
+        <p class="card-text"><strong>{{ item.brand }}</strong> {{ item.description }}</p>
+        <h4 class="card-title">
+            {{ item.price | currency:'$' }}
+            <span *ngIf="item.desc" class="badge badge-pill badge-danger">%{{ item.desc }}</span>
+        </h4>
+        <p class="card-text"><small *ngIf="item.priceOld" class="text-muted tachado">${{ item.priceOld | currency:'$' }}</small></p>
+    </div>
+</div>

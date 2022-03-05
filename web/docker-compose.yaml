@@ -1,0 +1,78 @@
+version: "3"
+services:
+  api:
+    build: ../api
+    ports: 
+      - 3000:3000
+    networks: 
+    - mynetwork
+    environment: 
+    - DB_URL=mongodb://productListUser:productListPassword@mongodb:27017/promotions?authSource=admin
+    depends_on: 
+      - mongodb
+      - mongo_import
+
+  mongodb:
+    image: mongo:3.6.8
+    ports:
+      - 27017:27017
+    networks: 
+    - mynetwork
+    environment: 
+    - MONGO_INITDB_ROOT_USERNAME=productListUser
+    - MONGO_INITDB_ROOT_PASSWORD=productListPassword
+
+  mongo_import:
+    depends_on: 
+    - mongodb
+    image: mongo:3.6.8
+    volumes:
+      - ../database:/database
+    command:
+      /database/import.sh mongodb
+    networks: 
+    - mynetwork
+
+  angular_cli:
+    image: trion/ng-cli:latest
+    container_name: "angular_cli"
+    volumes:
+      - .:/usr/app/
+    working_dir: /usr/app/
+    ports:
+      - 4200:4200
+    command: >
+      bash -c "npm install && ng serve --host 0.0.0.0 --configuration=qa"
+    networks: 
+    - mynetwork
+
+  angular_karma:
+    image: trion/ng-cli-karma:latest
+    container_name: "angular_karma"
+    volumes:
+      - .:/usr/app/
+    working_dir: /usr/app/
+    ports:
+      - 9876:9876
+    command: >
+      bash -c "./wait-for-it.sh 'http://angular_cli:4200' && ng test"
+    depends_on: 
+      - angular_cli
+    networks: 
+    - mynetwork
+
+  angular_e2e:
+    image: trion/ng-cli-e2e:latest
+    container_name: "angular_e2e"
+    volumes:
+      - .:/usr/app/
+    working_dir: /usr/app/
+    command: >
+      bash -c "./wait-for-it.sh 'http://angular_cli:4200' && ng e2e --configuration=qa"
+    depends_on: 
+      - angular_cli
+    networks: 
+    - mynetwork
+
+networks: 
+    mynetwork: {}
